@@ -8,3 +8,7 @@ dependencies:
   - jupyter
   - pytest
   - sphinx
+  - pip:
+    - sphinx-copybutton
+    - sphinx-toggleprompt
+    - pydata-sphinx-theme

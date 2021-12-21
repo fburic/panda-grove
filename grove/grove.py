@@ -17,29 +17,34 @@ class Collection:
           >>> import grove
           >>> df = pd.read_csv('c.csv')
           >>>
-          >>> data = grove.Collection({'A':  'a.csv',  'B': 'b.tsv', 'C': df})
+          >>> data = grove.Collection({'A':  'a.csv',
+          ...                          'B': 'b.tsv',
+          ...                          'C': df})
+          >>> data['D'] = 'd.tsv'
           >>> data['A']
           >>> data.B
           >>> data.C
 
     Note:
         For attribute access, the Collection class attribute names
-        (e.g. `show_schema`) take precedence and will be returned instead.
-
+        (e.g. ``show_schema``) take precedence and will be returned instead.
     """
+
     def __init__(self, data_sources: Union[dict, Iterable] = None, schema=None):
         """
         One can create an empty collection and add DataFrames iteratively,
         or initialize from a list / dictionary specifying DataFrames and labels.
 
         :param data_sources: Pairs of labels and file paths / DataFrames,
-        as a list of tuples or dictionary
+                             as a list of tuples or dictionary
 
         >>> data = grove.Collection()
         >>> data['A'] = 'a.csv'  # Will load data in a pandas DataFrame
         >>> data['B'] = df
         >>>
-        >>> data = grove.Collection({'A':  'a.csv',  'B': Path('b.tsv'), 'C': df})
+        >>> data = grove.Collection({'A':  'a.csv',
+        ...                          'B': pathlib.Path('b.tsv'),
+        ...                          'C': df})
         """
         if data_sources is None:
             self._data_frames = {}
@@ -102,8 +107,24 @@ class Collection:
     def info(self, memory_usage=True, verbose=False):
         """
         Print information about the collection.
+
         :param memory_usage: Whether to include memory estimates from DataFrames
-        :param verbose: Whether to also call .info() for DataFrames
+        :param verbose: Whether to also call ``.info()`` for DataFrames
+
+        >>> data = grove.Collection({
+        ...     'items': 'data/items.csv',
+        ...     'categories': 'data/categories.csv',
+        ...     'measurements': 'data/measurements.csv'})
+        >>> data.info()
+        Contents: 3 DataFrames
+        ['categories', 'items', 'measurements']
+        Memory usage
+        ============
+            DataFrame       MiB
+                items  0.000818
+           categories  0.001476
+         measurements  0.001195
+                TOTAL  0.003489
         """
         n_df = len(self._data_frames.items())
         df_names = sorted([df_name for df_name in self._data_frames.keys()])
