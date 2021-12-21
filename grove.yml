@@ -1,0 +1,10 @@
+name: grove
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.7
+  - pandas==1.1.0
+  - jupyter
+  - pytest
+  - sphinx
