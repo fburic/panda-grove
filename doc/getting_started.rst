@@ -10,7 +10,7 @@ mode from the repo:
 
 .. code-block:: shell
 
-    pip install -e git+https://github.com/fburic/panda-grove
+    pip install -e git+ssh://github.com/fburic/panda-grove.git#egg=panda-grove
 
 **TODO** Install the PyPI package:
 
