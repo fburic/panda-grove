@@ -16,3 +16,19 @@ creating yet another API on top of Pandas.
 - TODO: n-ary operations (e.g. merge across multiple DataFrames)
 - TODO: schema and datatype management
 
+
+## Installation
+
+Install the package with `pip` in
+[editable](https://pip.pypa.io/en/stable/cli/pip_install/#editable-installs)
+mode from the repo:
+
+```shell
+pip install -e git+ssh://github.com/fburic/panda-grove.git#egg=panda-grove
+```
+
+**TODO** Install the PyPI package:
+
+```shell
+pip install panda-grove
+```
