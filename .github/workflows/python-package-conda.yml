@@ -31,5 +31,6 @@ jobs:
     - name: Test with pytest
       run: |
         pip install pytest
+        cd ${GITHUB_WORKSPACE}
         pip install -e .
         pytest
