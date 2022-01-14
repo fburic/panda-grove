@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Panda Grove's documentation!
-=======================================
+Welcome to the Panda Grove documentation!
+=========================================
 
 .. toctree::
    :maxdepth: 2

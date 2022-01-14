@@ -1,3 +1,6 @@
+"""
+Test general Collection management
+"""
 import grove
 
 

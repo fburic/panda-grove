@@ -1,3 +1,5 @@
+.. _ref_collection:
+
 The Collection class
 ====================
 
