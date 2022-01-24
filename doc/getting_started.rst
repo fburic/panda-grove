@@ -98,6 +98,30 @@ More technical details can be viewed with the ``Collection.info()`` method::
      measurements  0.001195
             TOTAL  0.003489
 
+A quick preview of included DataFrames can be shown with ``Collection.head()``::
+
+    >>> data.head()
+
+.. code-block::
+
+    items
+    ========
+       id description
+    0  A1       A one
+    1  A2       A two
+
+    categories
+    ==========
+       id category
+    0  A1        A
+    1  A1      one
+
+    measurements
+    ============
+       id  value  measurement_num
+    0  A1      1                1
+    1  A1      2                2
+
 
 Merge multiple DataFrames
 -------------------------
@@ -121,10 +145,10 @@ Grove will iteratively merge a list of DataFrames.
 If the column to be merge on has the same name in all given DataFrames,
 the ``on`` argument can be omitted, as with Pandas ``merge()``.
 
-If column names differ between DataFrames, they are provided as a list:
+If column names differ between DataFrames, they are provided as a list.
 
     >>> data.merge(['items', 'categories', 'measurements'],
-    ...            on=['id', 'id', 'id_2'])
+    ...            on=['id', ['id', 'id_2']])
 
 .. code-block::
 
@@ -137,8 +161,8 @@ If column names differ between DataFrames, they are provided as a list:
     5   A1       A one      one   A1      1                3
     ...
 
-This is just shorthand for the normal Pandas way to merge multiple DataFrames,
-but less writing and easier scaling:
+This operation is just shorthand for the normal Pandas way to merge multiple DataFrames,
+(as shown below) but less writing and easier scaling.
 
 .. code-block:: python
 
@@ -148,3 +172,9 @@ but less writing and easier scaling:
         ),
         data['measurements'], left_on='id', right_on='id_2'
     )
+
+The general structure for a list of DataFrames ``[X1, X2, ...,  Xn]`` is
+``[X1X2_on, X2X3_on, ..., Xn-1Xn_on]``,
+where ``XiXj_on`` can be a string (common column),
+a pair of strings (*left_on*, *right_on* arguments),
+or a pair of list of multiple columns to join on.

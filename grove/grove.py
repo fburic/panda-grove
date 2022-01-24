@@ -117,14 +117,48 @@ class Collection:
 
     def merge(self, df_name_list: list, on: Union[str, list] = None) -> pd.DataFrame:
         """
-        Merge multiple DataFrames in the Collection
+        Merge multiple DataFrames in the Collection.
+
+        The merging is performed pairwise, in the specified order.
+        I.e. for a given list ``['A', 'B', 'C']``,
+        the result is ``merge(merge(A,B), C)``
+
+        Handling of the ``on`` argument is only slightly wrapped around Pandas behavior.
+        The ``on`` argument can be omitted to join on the intersection of columns.
+        A single string may be provided if it's the common column to join on in all DataFrames.
+        The general structure for a list of DataFrames ``[X1, X2, ...,  Xn]`` is
+        ``[X1X2_on, X2X3_on, ..., Xn-1Xn_on]``,
+        where ``XiXj_on`` can be a string (common column),
+        a pair of strings (*left_on*, *right_on* arguments),
+        or a pair of list of multiple columns to join on.
+        See *Examples* below.
+
+        Note that inner and (full) outer joins are **associative** and **commutative**,
+        meaning the order will not matter for these.
 
         Examples
         --------
+
+        All DataFrames are to be merged on their ``'id'`` column:
+
         >>> data.merge(['items', 'categories', 'measurements'], on='id')
 
-        >>> data.merge(['items', 'categories', 'measurements'],
-        ...            on=['id', 'id', 'id_2']
+
+        DataFrames ``items`` and ``categories`` are merged on ``'id'``, while
+        ``cat_descr`` is merged on ``'category'``, which matches ``'category'`` in ``categories``:
+
+        >>> data.merge(['items', 'categories', 'cat_descr'],
+        ...            on=['id', ['category', 'category_code']])
+
+        Multi-column join between ``items`` and ``categories``
+        (on columns ``'id'`` and ``'id2'``), followed by joining in ``measurements``
+        on column ``'id_x'`` matching column ``'id2'`` in the ``items - categories`` merge.
+
+        >>> data.merge(
+        ...     ['items', 'categories', 'measurements'],
+        ...     on=[[['id', 'id2'], ['id', 'id2']],
+        ...         ['id2', 'id_x']]
+        ... )
 
         :param df_name_list: Names of collection DataFrame to merge
         :param on: Column names to join on.
@@ -133,27 +167,42 @@ class Collection:
                    as a list.
         :return: Merged DataFrame
         """
+        # Normalize id_list for uniform merging
+        # Normal form is [[id, id], [id, id], ... ]
         if on is None:
-            id_list = [None for _ in range(len(df_name_list))]
+            id_list = [[None, None] for _ in range(len(df_name_list) - 1)]
         elif isinstance(on, str):
-            id_list = [on for _ in range(len(df_name_list))]
+            id_list = [[on, on] for _ in range(len(df_name_list) - 1)]
         elif isinstance(on, list):
             id_list = on
         else:
             raise GroveError(f'Specification of columns to merge on not supported: {on}')
+        id_list = [[m_id, m_id] if isinstance(m_id, str) else m_id
+                   for m_id in id_list]
 
-        for i, col_id in enumerate(id_list):
-            if col_id is not None and col_id not in self._data_frames[df_name_list[i]]:
-                raise GroveError(f"Column '{col_id}' not present in '{df_name_list[i]}'")
+        # Explicitly fail if columns not present
+        for i, m_id in enumerate(id_list):
+            for k, col_id in enumerate(m_id):
+                df = df_name_list[i + k]
+                if col_id is not None:  # and col_id not in self._data_frames[df]:
+                    try:
+                        _ = self._data_frames[df][col_id]
+                    except KeyError:
+                        raise GroveError(f"'{col_id}' not present in '{df}'")
 
         merged_df = self._data_frames[df_name_list[0]]
-        for i in range(1, len(df_name_list)):
-            merged_df = pd.merge(
-                merged_df,
-                self._data_frames[df_name_list[i]],
-                left_on=id_list[i - 1],
-                right_on=id_list[i]
-            )
+        for i, m_id in enumerate(id_list):
+            try:
+                merged_df = pd.merge(
+                    merged_df,
+                    self._data_frames[df_name_list[i + 1]],
+                    left_on=m_id[0],
+                    right_on=m_id[1]
+                )
+            except Exception as e:
+                print(f"Error merging in '{df_name_list[i]}'")
+                raise e
+
         return merged_df
 
     def info(self, memory_usage=True, verbose=False):
@@ -203,14 +252,28 @@ class Collection:
         print(info)
         if verbose:
             for df_name in df_names:
-                print(df_name + '\n' + '=' * max(8, len(df_name)) + '\n')
+                print(_decoration_title(df_name) + '\n')
                 print(self._data_frames[df_name].info(memory_usage=not memory_usage))
                 print()
+
+    def head(self,  n: int = 5) -> None:
+        """
+        Iteratively print head() for all DataFrames in the collection
+        :param n: How many rows to show
+        """
+        for df_name, df in self._data_frames.items():
+            print(_decoration_title(df_name))
+            print(df.head(n))
+            print()
 
 
 def _read_dataframe(df_source):
     """Light wrapper to uniformize parameters, any processing, etc."""
     return pd.read_table(df_source, sep=None, engine='python')
+
+
+def _decoration_title(df_name):
+    return df_name + '\n' + '=' * max(8, len(df_name))
 
 
 class GroveError(Exception):
