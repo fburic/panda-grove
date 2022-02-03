@@ -13,7 +13,7 @@ creating yet another API on top of Pandas.
 ## Highlights
 
 - `Collection` class to encapsulate and manage multiple DataFrames
-- TODO: n-ary operations (e.g. merge across multiple DataFrames)
+- multi-merges (e.g. merge across multiple DataFrames)
 - TODO: schema and datatype management
 
 
