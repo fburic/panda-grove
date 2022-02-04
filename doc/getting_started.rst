@@ -178,3 +178,9 @@ The general structure for a list of DataFrames ``[X1, X2, ...,  Xn]`` is
 where ``XiXj_on`` can be a string (common column),
 a pair of strings (*left_on*, *right_on* arguments),
 or a pair of list of multiple columns to join on.
+
+There is also a module-level version of the ``merge`` function
+that works independently of a Collection and may be passed
+a list of DataFrame objects.
+
+    >>> grove.merge([df1, df2, df3], on='id'])

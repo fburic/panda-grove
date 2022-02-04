@@ -52,7 +52,7 @@ def test_merge_diff_id():
 
     assert merged_df.compare(merged_df_pandas).empty
     with pytest.raises(grove.GroveError,
-                       match="'id_x' not present in 'categories'"):
+                       match="'id_x' not present in DataFrame 1"):
         data.merge(['items', 'categories'], on=[['id', 'id_x']])
 
 
@@ -94,5 +94,26 @@ def test_merge_multicolumn():
             left_on=id_list[0][0], right_on=id_list[0][1]
         ),
         data['measurements'], left_on=id_list[1][0], right_on=id_list[1][1]
+    )
+    assert merged_df.compare(merged_df_pandas).empty
+
+
+def test_merge_dataframes():
+    data = grove.Collection(
+        [('items', 'data/items.csv'),
+         ('categories', 'data/categories.csv'),
+         ('cat_descr', 'data/category_descriptions.csv')
+         ]
+    )
+    df_list = [data['items'][['id']],
+               data['categories'].head(4),
+               data['cat_descr'].drop_duplicates('category_code')]
+    id_list = ['id', ['category', 'category_code']]
+    merged_df = grove.merge(df_list, on=id_list)
+    merged_df_pandas = pd.merge(
+        pd.merge(
+            df_list[0], df_list[1], on=id_list[0]
+        ),
+        df_list[2], left_on=id_list[1][0], right_on=id_list[1][1]
     )
     assert merged_df.compare(merged_df_pandas).empty

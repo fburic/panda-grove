@@ -1,8 +1,43 @@
 .. _ref_collection:
 
-The Collection class
-====================
+Collection
+==========
 
-.. autoclass:: grove.Collection
-   :members:
-   :special-members: __init__
+.. currentmodule:: grove
+
+.. autoclass:: Collection
+
+Constructor
+"""""""""""
+
+.. autosummary::
+   :toctree: collection/
+
+  ~Collection.__init__
+
+Methods
+"""""""
+
+.. autosummary::
+   :toctree: collection/
+
+  ~Collection.head
+  ~Collection.info
+  ~Collection.merge
+
+Attributes
+""""""""""
+
+.. autosummary::
+   :toctree: collection/
+
+  ~Collection.dataframe_list
+
+
+All members
+"""""""""""
+
+.. toctree::
+    :glob:
+
+    collection/*
