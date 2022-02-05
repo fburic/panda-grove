@@ -47,6 +47,20 @@ If any name in the list is missing, a ``GroveError`` is raised.
 Generally, Panda Grove prefers to fail quickly, loudly, and explicitly,
 to avoid errors creeping in.
 
+.. tip::
+
+    Creating a Collection using a dictionary of ``df_names -> filenames``
+    (like in the first example above) has the advantage that the dictionary can be saved
+    as a YAML / JSON specification, to be reused across pipelines or projects.
+    E.g.
+
+    .. code-block:: python
+
+        import yaml
+        with open('pipeline/input_data.yaml') as spec_file:
+            data_spec = yaml.load(config_file, Loader=yaml.FullLoader)
+            data = grove.Collection(data_spec)
+
 Adding new DataFrames
 """""""""""""""""""""
 
@@ -145,6 +159,12 @@ Grove will iteratively merge a list of DataFrames.
 If the column to be merge on has the same name in all given DataFrames,
 the ``on`` argument can be omitted, as with Pandas ``merge()``.
 
+There is also a module-level version of the ``merge`` function
+that works independently of a Collection and may be passed
+a list of DataFrame objects.
+
+    >>> grove.merge([df1, df2, df3], on='id'])
+
 If column names differ between DataFrames, they are provided as a list.
 
     >>> data.merge(['items', 'categories', 'measurements'],
@@ -178,9 +198,3 @@ The general structure for a list of DataFrames ``[X1, X2, ...,  Xn]`` is
 where ``XiXj_on`` can be a string (common column),
 a pair of strings (*left_on*, *right_on* arguments),
 or a pair of list of multiple columns to join on.
-
-There is also a module-level version of the ``merge`` function
-that works independently of a Collection and may be passed
-a list of DataFrame objects.
-
-    >>> grove.merge([df1, df2, df3], on='id'])
