@@ -9,6 +9,7 @@ without the strong structural and data type enforcements.
 The philosophy of Panda Grove is to assist without getting in the way or
 creating yet another API on top of Pandas.
 
+![AppVeyor tests](https://img.shields.io/appveyor/tests/fburic/panda-grove?color=brightgreen)
 
 ## Highlights
 
