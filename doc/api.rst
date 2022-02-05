@@ -9,3 +9,11 @@ API Reference: The grove module
 Multi-merge
 """""""""""
 .. autofunction:: grove.merge
+
+Optimize size of DataFrames
+"""""""""""""""""""""""""""
+.. autofunction:: grove.reduce_mem_df
+
+Optimize size of Series
+"""""""""""""""""""""""
+.. autofunction:: grove.reduce_mem_series

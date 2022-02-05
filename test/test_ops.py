@@ -1,6 +1,7 @@
 """
 Test Panda Grove operations on DataFrames
 """
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -117,3 +118,44 @@ def test_merge_dataframes():
         df_list[2], left_on=id_list[1][0], right_on=id_list[1][1]
     )
     assert merged_df.compare(merged_df_pandas).empty
+
+
+def test_reduce_mem_series():
+    rng = np.random.default_rng(42)
+    df_len = 10
+    df = pd.DataFrame.from_records(
+        zip(rng.integers(0, int(1e6), size=df_len),
+            rng.random(size=df_len) * 1e6,
+            rng.integers(0, 1, size=df_len)
+            ),
+        columns=['integers', 'floats', 'binaries']
+    )
+
+    assert grove.reduce_mem_series(df['integers']).dtype <= 'uint64'
+    assert grove.reduce_mem_series(df['integers']).dtype == 'uint32'
+    assert grove.reduce_mem_series(df['integers'] * -1).dtype == 'int32'
+    assert grove.reduce_mem_series(df['binaries'] * -1).dtype == 'uint8'
+    assert grove.reduce_mem_series(df['floats'],
+                                   target_float='float32').dtype == 'float32'
+
+
+def test_reduce_mem_df():
+    rng = np.random.default_rng(42)
+    df_len = 10
+    df = pd.DataFrame.from_records(
+        zip(rng.integers(0, int(1e6), size=df_len),
+            rng.random(size=df_len) * 1e6,
+            rng.integers(0, 1, size=df_len)
+            ),
+        columns=['integers', 'floats', 'binaries']
+    )
+
+    opt_df = grove.reduce_mem_df(df)
+    assert opt_df['integers'].dtype == 'uint32'
+    assert opt_df['floats'].dtype == 'float32'
+    assert opt_df['binaries'].dtype == 'uint8'
+
+    df = grove.reduce_mem_df(df, inplace=True)
+    assert df['integers'].dtype == 'uint32'
+    assert df['floats'].dtype == 'float32'
+    assert df['binaries'].dtype == 'uint8'

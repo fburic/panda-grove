@@ -1,9 +1,10 @@
 from pathlib import Path
 from typing import Iterable, Union
 
+import numpy as np
 import pandas as pd
 
-__all__ = ['Collection', 'merge', 'GroveError']
+__all__ = ['Collection', 'merge', 'reduce_mem_series', 'reduce_mem_df', 'GroveError']
 
 
 class Collection:
@@ -220,9 +221,87 @@ class Collection:
         print(info)
         if verbose:
             for df_name in df_names:
-                print(_decoration_title(df_name) + '\n')
+                print(_decoration_title(df_name))
                 print(self._data_frames[df_name].info(memory_usage=not memory_usage))
                 print()
+
+    def reduce_mem(self, target_float: str = 'float32'):
+        """
+        Minimize the Collection memory usage,
+        by using the smallest applicable Numpy datatypes for all integer and float columns,
+        in all included DataFrames.
+        This is done **in-place** (i.e. will modify the collection DataFrames),
+        since the use case is optimizing large Collections for downstream analyses.
+
+        For floats, the target float precision (default ``float32``)
+        must be decided beforehand, since this is application-specific.
+
+        Subsequent operations on the DataFrames will likely promote the dtypes to the
+        platform default (e.g. ``int64``).
+
+        Example
+        -------
+
+        >>> rng = np.random.default_rng(42)
+        >>> df_len = int(1e6)
+        >>> df = pd.DataFrame.from_records(
+        ...     zip(rng.integers(0, int(1e6), size=df_len),
+        ...         rng.random(size=df_len) * 1e6,
+        ...         rng.integers(0, 1, size=df_len)
+        ...         ),
+        ...     columns=['integers', 'floats', 'binaries'])
+        >>> data = grove.Collection({'df1': df})
+        >>> data.info(verbose=True)
+        Contents: 1 DataFrames
+        ['df1']
+        Memory usage
+        ============
+        DataFrame        MiB
+              df1  22.888306
+            TOTAL  22.888306
+        df1
+        ========
+        <class 'pandas.core.frame.DataFrame'>
+        RangeIndex: 1000000 entries, 0 to 999999
+        Data columns (total 3 columns):
+         #   Column    Non-Null Count    Dtype
+        ---  ------    --------------    -----
+         0   integers  1000000 non-null  int64
+         1   floats    1000000 non-null  float64
+         2   binaries  1000000 non-null  int64
+        dtypes: float64(1), int64(2)None
+
+        The default sizes on the system in this example are ``int64`` and ``float64``,
+        which are too large for our data.
+        Memory usage can be reduced by a factor of *2.6*:
+
+        >>> data.reduce_mem()
+        >>> data.info(verbose=True)
+        Contents: 1 DataFrames
+        ['df1']
+        Memory usage
+        ============
+        DataFrame       MiB
+              df1  8.583191
+            TOTAL  8.583191
+        df1
+        ========
+        <class 'pandas.core.frame.DataFrame'>
+        RangeIndex: 1000000 entries, 0 to 999999
+        Data columns (total 3 columns):
+         #   Column    Non-Null Count    Dtype
+        ---  ------    --------------    -----
+         0   integers  1000000 non-null  uint32
+         1   floats    1000000 non-null  float32
+         2   binaries  1000000 non-null  uint8
+        dtypes: float32(1), uint32(1), uint8(1)None
+
+        :param target_float: Float columns will be converted to this precision.
+        """
+        for df_name in self._data_frames.keys():
+            _ = reduce_mem_df(self._data_frames[df_name],
+                              target_float=target_float,
+                              inplace=True)
 
     def head(self,  n: int = 5) -> None:
         """
@@ -322,6 +401,104 @@ def merge(df_list: list, on: Union[str, list] = None) -> pd.DataFrame:
             raise e
 
     return merged_df
+
+
+def reduce_mem_series(values: pd.Series, target_float: str = 'float32') -> pd.Series:
+    """
+    Minimize memory usage of a Series
+    by using the smallest applicable Numpy datatype.
+    Handles integers and floats only.
+
+    For floats, the target float precision (default ``float32``)
+    must be decided beforehand, since this is application-specific.
+
+    Subsequent operations on the Series will likely promote the dtype to the
+    platform default (e.g. ``int64``) so best used with read-only data.
+
+    Example
+    -------
+
+    >>> rng = np.random.default_rng(42)
+    >>> series = pd.Series(rng.integers(0, int(1e6), size=10))
+    >>> print(series.dtype)
+    >>> print(grove.reduce_mem_series(series).dtype)
+    int64
+    uint32
+
+    :param values: A Pandas Series.
+    :param target_float: A float Series will be converted to this precision.
+    :return: A copy of the input Series with optimized dtypes.
+    """
+    if values.dtype.kind not in ['i', 'u', 'f']:
+        return values
+    if values.dtype.kind == 'f':
+        return values.astype(target_float)
+
+    min_val = values.min()
+    max_val = values.max()
+    new_type = values.dtype
+    for dtype in [np.uint8, np.uint16, np.uint32, np.int8, np.int16, np.int32]:
+        if np.iinfo(dtype).min <= min_val and max_val <= np.iinfo(dtype).max:
+            new_type = dtype
+            break
+    opt = values.astype(new_type)
+
+    assert np.allclose(values.values, opt.values), \
+        'Grove bug: Type-optimized values differ from input'
+    return opt
+
+
+def reduce_mem_df(df: pd.DataFrame,
+                  target_float: str = 'float32',
+                  inplace=False) -> pd.DataFrame:
+    """
+    Minimize memory usage of a DataFrame
+    by using the smallest applicable Numpy datatypes for all integer and float columns.
+
+    For floats, the target float precision (default ``float32``)
+    must be decided beforehand, since this is application-specific.
+
+    Subsequent operations on the DataFrame will likely promote the dtypes to the
+    platform default (e.g. ``int64``) so best used with read-only data.
+
+    Good practice is usually to keep input data immutable, but due to sheer size of
+    some DataFrames, this operation can be done in-place,
+    by setting the ``inplace`` flag.
+
+    Example
+    -------
+
+    >>> rng = np.random.default_rng(42)
+    >>> df = pd.DataFrame.from_records(
+    ... zip(rng.integers(0, int(1e6), size=df_len),
+    ...     rng.random(size=df_len) * 1e6,
+    ...     rng.integers(0, 1, size=df_len)
+    ...     ),
+    ... columns=['integers', 'floats', 'binaries'])
+    >>> print(df.dtypes)
+    integers      int64
+    floats      float64
+    binaries      int64
+    dtype: object
+    >>> print(grove.reduce_mem_df(df).dtypes)
+    integers     uint32
+    floats      float32
+    binaries      uint8
+    dtype: object
+
+    :param df: Input DataFrame, which will not be changed unless ``inplace`` is set.
+    :param target_float: Float columns will be converted to this precision.
+    :param inplace: Defaults to ``False``. If ``True``, the input DataFrame will be changed.
+    :return: A new DataFrame with reduced datatypes if ``inplace`` is not set,
+             otherwise a reference will be returned to the changed input DataFrame.
+    """
+    if inplace:
+        opt = df
+    else:
+        opt = df.copy(deep=True)
+    for label, _ in opt.items():
+        opt[label] = reduce_mem_series(opt[label], target_float=target_float)
+    return opt
 
 
 def _read_dataframe(df_source):

@@ -24,6 +24,7 @@ Methods
   ~Collection.head
   ~Collection.info
   ~Collection.merge
+  ~Collection.reduce_mem
 
 Attributes
 """"""""""
