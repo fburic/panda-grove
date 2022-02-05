@@ -4,7 +4,9 @@ from typing import Iterable, Union
 import numpy as np
 import pandas as pd
 
-__all__ = ['Collection', 'merge', 'reduce_mem_series', 'reduce_mem_df', 'GroveError']
+__all__ = ['Collection', 'merge', 'reduce_mem_series', 'reduce_mem_df',
+           'sanity_check_df',
+           'GroveError']
 
 
 class Collection:
@@ -499,6 +501,82 @@ def reduce_mem_df(df: pd.DataFrame,
     for label, _ in opt.items():
         opt[label] = reduce_mem_series(opt[label], target_float=target_float)
     return opt
+
+
+def sanity_check_df(df: pd.DataFrame, id_column: str = '') -> bool:
+    """
+    Check for typical desirable data properties for the given DataFrame:
+
+    - Unique IDs (either in specified ``id_column`` or any non-float, no-N/As column)
+    - No completely empty (N/A) columns
+
+    Example
+    -------
+
+    >>> df = pd.DataFrame.from_records(
+    ...     zip([10, 20, 30, 10, 40],
+    ...         ['a', 'b', 'c', 'd', 'e'],
+    ...         [np.nan] * 5,
+    ...         ['10', '20', '30', '40', None]),
+    ...     columns=['id', 'descr', 'values', 'serials'])
+
+    >>> grove.sanity_check_df(df, id_column='id')
+    WARN: ID column 'id' does not have unique values
+    WARN: The following columns are completely empty (N/A): ['values']
+    False
+
+    >>> grove.sanity_check_df(df, id_column='serials')
+    WARN: ID column 'serials' has N/A values
+    WARN: The following columns are completely empty (N/A): ['values']
+    False
+
+    :param df: Pandas DataFrame
+    :param id_column: If given, this column is checked for unique values
+    :return: **True** if all checks passed, **False** otherwise
+    """
+    passed = True
+
+    if id_column:
+        if not _series_has_unique_values(df[id_column]):
+            print(f"WARN: ID column '{id_column}' does not have unique values")
+            passed = False
+        elif df[id_column].isna().any():
+            print(f"WARN: ID column '{id_column}' has N/A values")
+            passed = False
+    else:
+        potential_id_columns = []
+        for label, _ in df.items():
+            if (df[label].dtype.kind != 'f'
+                and _series_has_unique_values(df[label])
+                and df[label].isna().any()
+            ):
+                potential_id_columns.append(label)
+        if not potential_id_columns:
+            print('WARN: No columns in the DataFrame can be used as IDs (unique, non-float, no N/As)')
+            passed = False
+        else:
+            print('INFO: Potential ID columns (unique values):',
+                  str(potential_id_columns))
+
+    null_columns = []
+    for label, _ in df.items():
+        if df[label].isna().all():
+            null_columns.append(label)
+    if null_columns:
+        print('WARN: The following columns are completely empty (N/A):',
+              str(null_columns))
+        passed = False
+
+    if passed:
+        print('INFO: All checks passed')
+    return passed
+
+
+def _series_has_unique_values(series: pd.Series) -> bool:
+    if series.values.shape[0] > series.unique().shape[0]:
+        return False
+    else:
+        return True
 
 
 def _read_dataframe(df_source):

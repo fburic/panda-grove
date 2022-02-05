@@ -159,3 +159,18 @@ def test_reduce_mem_df():
     assert df['integers'].dtype == 'uint32'
     assert df['floats'].dtype == 'float32'
     assert df['binaries'].dtype == 'uint8'
+
+
+def test_sanity_check_df():
+    df = pd.DataFrame.from_records(
+        zip([10, 20, 30, 10, 40],
+            ['a', 'b', 'c', 'd', 'e'],
+            ['10', '20', '30', '40', None]),
+        columns=['id', 'descr', 'serials']
+    )
+    assert grove.sanity_check_df(df)
+    assert not grove.sanity_check_df(df, id_column='id')
+    assert not grove.sanity_check_df(df, id_column='serials')
+
+    df = df.assign(values = [np.nan] * 5)
+    assert not grove.sanity_check_df(df)
