@@ -128,7 +128,7 @@ class Collection:
         the result is ``merge(merge(A, B), C)``
 
         Handling of the ``on`` argument is only slightly wrapped around Pandas behavior.
-        The ``on`` argument can be omitted to join on the intersection of columns.
+        The ``on`` argument can be omitted to join on the columns with the same name in all DataFrames.
         A single string may be provided if it's the common column to join on in all DataFrames.
         The general structure for a list of DataFrames ``[X1, X2, ...,  Xn]`` is
         ``[X1X2_on, X2X3_on, ..., Xn-1Xn_on]``,
@@ -138,8 +138,9 @@ class Collection:
         See *Examples* below.
 
         Note:
-            Inner and (full) outer joins are **associative** and **commutative**,
-            meaning the order will not matter for these.
+            Since the merge operation is performed iteratively left-to-right,
+            each ``XiXj_on`` ``on`` specification can use any column in preceding DataFrames,
+            not just the columns in the adjacent ``Xi`` and ``Xj`` DataFrames.
 
         Examples
         --------
@@ -346,7 +347,7 @@ def merge(df_list: list, on: Union[str, list] = None) -> pd.DataFrame:
     the result is ``merge(merge(df_A, df_B), df_C)``
 
     Handling of the ``on`` argument is only slightly wrapped around Pandas behavior.
-    The ``on`` argument can be omitted to join on the intersection of columns.
+    The ``on`` argument can be omitted to join on the columns with the same name in all DataFrames.
     A single string may be provided if it's the common column to join on in all DataFrames.
     The general structure for a list of DataFrames ``[X1, X2, ...,  Xn]`` is
     ``[X1X2_on, X2X3_on, ..., Xn-1Xn_on]``,
@@ -356,8 +357,9 @@ def merge(df_list: list, on: Union[str, list] = None) -> pd.DataFrame:
     See *Examples* below.
 
     Note:
-        Inner and (full) outer joins are **associative** and **commutative**,
-        meaning the order will not matter for these.
+        Since the merge operation is performed iteratively left-to-right,
+        each ``XiXj_on`` ``on`` specification can use any column in preceding DataFrames,
+        not just the columns in the adjacent ``Xi`` and ``Xj`` DataFrames.
 
     :param df_list: DataFrames to be merged, in order they appear in the list
     :param on: Column names to join on.
