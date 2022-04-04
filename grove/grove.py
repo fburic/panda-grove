@@ -166,6 +166,14 @@ class Collection:
         ...         ['id2', 'id_x']]
         ... )
 
+        For multi-column joins with common columns,
+        make sure to put these in a nested list:
+
+        >>> data.merge(
+        ...     ['items', 'categories', 'measurements'],
+        ...     on=[[['A', 'B']], ['id2', 'id_x']]
+        ... )
+
         :param df_name_list: Names of collection DataFrame to merge
         :param on: Column names to join on.
                    Either a single string or omitted if it's the same across all
@@ -329,15 +337,16 @@ def merge(df_list: list, on: Union[str, list] = None) -> pd.DataFrame:
     """
     Merge multiple DataFrames.
     This module-level function allows more flexibility in passing DataFrame
-    while doing operations on these on the fly.
+    while doing any on-the-fly operations.
 
     Example
     -------
 
     >>> grove.merge(
-    ...     [items[['id']],
-    ...      categories.head(4),
-    ...      cat_descr.drop_duplicates('category_code')
+    ...     [
+    ...         items[['id']],
+    ...         categories.head(4),
+    ...         cat_descr.drop_duplicates('category_code')
     ...     ],
     ...     on=['id', ['category', 'category_code']]
     ... )
@@ -358,8 +367,40 @@ def merge(df_list: list, on: Union[str, list] = None) -> pd.DataFrame:
 
     Note:
         Since the merge operation is performed iteratively left-to-right,
-        each ``XiXj_on`` ``on`` specification can use any column in preceding DataFrames,
+        each ``XiXj_on`` specification can use any column in preceding DataFrames,
         not just the columns in the adjacent ``Xi`` and ``Xj`` DataFrames.
+
+    Examples
+    --------
+
+    All DataFrames are to be merged on their ``'id'`` column:
+
+    >>> grove.merge([items_df, categories_df, measurements_df], on='id')
+
+
+    DataFrames ``items_df`` and ``categories_df`` are merged on ``'id'``, while
+    ``cat_descr_df`` is merged on ``'category'``,
+    which matches ``'category'`` in ``categories_df``:
+
+    >>> grove.merge([items_df, categories_df, cat_descr_df],
+    ...             on=['id', ['category', 'category_code']])
+
+    Multi-column join between ``items_df`` and ``categories_df``
+    (on columns ``'id'`` and ``'id2'``), followed by joining in ``measurements_df``
+    on column ``'id_x'`` matching column ``'id2'`` in the ``items - categories`` merge.
+
+    >>> grove.merge(
+    ...     [items_df, categories_df, measurements_df],
+    ...      on=[[['id', 'id2'], ['id', 'id2']], ['id2', 'id_x']]
+    ... )
+
+    For multi-column joins with common columns,
+    make sure to put these in a nested list:
+
+    >>> grove.merge(
+    ...     [items_df, categories_df, measurements_df],
+    ...      on=[[['A', 'B']], ['id2', 'id_x']]
+    ... )
 
     :param df_list: DataFrames to be merged, in order they appear in the list
     :param on: Column names to join on.
@@ -377,12 +418,42 @@ def merge(df_list: list, on: Union[str, list] = None) -> pd.DataFrame:
     elif isinstance(on, list):
         id_list = on
     else:
-        raise GroveError(f'Specification of columns to merge on not supported: {on}')
-    id_list = [[m_id, m_id] if isinstance(m_id, str) else m_id
-               for m_id in id_list]
+        raise GroveError(f'Specification of merge columns not supported: {on}')
+
+    # Process list into (left_on, right_on pairs)
+    id_list_norm = []
+    for m_id in id_list:
+        # Common column name
+        if isinstance(m_id, str):
+            merge_pair = [m_id, m_id]
+
+        # Multi-column merge
+        elif isinstance(m_id, list) and _depth(m_id) == 2:
+
+            # same columns: [['A', 'B']]
+            if len(m_id) == 1:
+                merge_pair = [m_id[0], m_id[0]]
+
+            # diff columns: [['A_left', 'B_left'], ['A_right', 'B_right']]
+            elif len(m_id) == 2:
+                merge_pair = m_id
+            else:
+                raise GroveError(f'Specification of merge columns not supported: {on}')
+
+        #  Diff left and right columns: ['A', 'B']
+        elif isinstance(m_id, list) and _depth(m_id) == 1 and len(m_id) == 2:
+            merge_pair = m_id
+
+        else:
+            raise GroveError(f'Specification of merge columns not supported: {on}')
+
+        id_list_norm.append(merge_pair)
+
+    # id_list = [[m_id, m_id] if isinstance(m_id, str) else m_id
+    #            for m_id in id_list]
 
     # Explicitly fail if columns not present
-    for i, m_id in enumerate(id_list):
+    for i, m_id in enumerate(id_list_norm):
         for k, col_id in enumerate(m_id):
             if col_id is not None:
                 df_num = i + k
@@ -392,7 +463,7 @@ def merge(df_list: list, on: Union[str, list] = None) -> pd.DataFrame:
                     raise GroveError(f"'{col_id}' not present in DataFrame {df_num}")
 
     merged_df = df_list[0]
-    for i, m_id in enumerate(id_list):
+    for i, m_id in enumerate(id_list_norm):
         try:
             merged_df = pd.merge(
                 merged_df,
@@ -586,8 +657,22 @@ def _read_dataframe(df_source):
     return pd.read_table(df_source, sep=None, engine='python')
 
 
-def _decoration_title(df_name):
+def _decoration_title(df_name: str) -> str:
     return df_name + '\n' + '=' * max(8, len(df_name))
+
+
+def _depth(on_list: Union[list, str]) -> int:
+    """
+    Count the depth of a list expected to be a ``on`` merge spec.
+    Expects symmetric list contents, i.e. [A, B] and [[A, B], [X, Y]].
+    The depth probing is done recursively on the first element.
+    """
+    if isinstance(on_list, str):
+        return 0
+    elif isinstance(on_list, list):
+        return _depth(on_list[0]) + 1
+    else:
+        return 0
 
 
 class GroveError(Exception):

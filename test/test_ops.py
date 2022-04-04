@@ -87,6 +87,7 @@ def test_merge_multicolumn():
     data['categories'] = data['categories'].assign(id2=data['categories']['id'])
     data['measurements'] = data['measurements'].rename(columns={'id': 'id_x'})
 
+    # Test multi-column with diff left/right columns
     id_list = [[['id', 'id2'], ['id', 'id2']], ['id2', 'id_x']]
     merged_df = data.merge(['items', 'categories', 'measurements'], on=id_list)
     merged_df_pandas = pd.merge(
@@ -96,7 +97,14 @@ def test_merge_multicolumn():
         ),
         data['measurements'], left_on=id_list[1][0], right_on=id_list[1][1]
     )
+
+    # Test multi-column with common columns
+    id_list_common = [[['id', 'id2']], ['id2', 'id_x']]
+    merged_df_common = data.merge(['items', 'categories', 'measurements'],
+                                  on=id_list_common)
+
     assert merged_df.compare(merged_df_pandas).empty
+    assert merged_df_common.compare(merged_df).empty
 
 
 def test_merge_dataframes():
@@ -174,3 +182,9 @@ def test_sanity_check_df():
 
     df = df.assign(values = [np.nan] * 5)
     assert not grove.sanity_check_df(df)
+
+
+def test_depth():
+    assert grove._depth('A') == 0
+    assert grove._depth(['A', 'B']) == 1
+    assert grove._depth([['A_left', 'B_left'], ['A_right', 'B_right']]) == 2

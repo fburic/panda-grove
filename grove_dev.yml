@@ -13,3 +13,4 @@ dependencies:
     - sphinx-copybutton
     - sphinx-toggleprompt
     - pydata-sphinx-theme
+    - sphinx-autodoc-typehints
