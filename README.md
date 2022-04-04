@@ -2,8 +2,10 @@
 
 A lightweight package for easier management of multiple Pandas DataFrames.
 
-The philosophy of Panda Grove is to assist without getticng in the way or
+The philosophy of Panda Grove is to assist without getting in the way or
 creating yet another API on top of Pandas.
+
+It also depends exclusively on the Pandas package for minimal overhead.
 
 ![AppVeyor tests](https://img.shields.io/appveyor/tests/fburic/panda-grove?color=brightgreen)
 

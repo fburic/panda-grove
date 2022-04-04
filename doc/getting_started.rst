@@ -198,3 +198,7 @@ The general structure for a list of DataFrames ``[X1, X2, ...,  Xn]`` is
 where ``XiXj_on`` can be a string (common column),
 a pair of strings (*left_on*, *right_on* arguments),
 or a pair of list of multiple columns to join on.
+
+Since the merge operation is performed iteratively left-to-right,
+each ``XiXj_on`` specification can use any column in preceding DataFrames,
+not just the columns in the adjacent ``Xi`` and ``Xj`` DataFrames.
