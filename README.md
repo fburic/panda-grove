@@ -1,21 +1,18 @@
-# Panda Grove
+# Panda Grove :bamboo:
 
 A lightweight package for easier management of multiple Pandas DataFrames.
 
-Some inspiration is taken from database models to help track relationships between
-DataFrames and facilitate operations between these, 
-without the strong structural and data type enforcements.
-
-The philosophy of Panda Grove is to assist without getting in the way or
+The philosophy of Panda Grove is to assist without getticng in the way or
 creating yet another API on top of Pandas.
 
 ![AppVeyor tests](https://img.shields.io/appveyor/tests/fburic/panda-grove?color=brightgreen)
 
-## Highlights
+## Feature Highlights
 
-- `Collection` class to encapsulate and manage multiple DataFrames
-- Multi-merges (e.g. merge across multiple DataFrames)
-- TODO: schema and datatype management
+:ballot_box_with_check: Multi-merges (e.g. merge across multiple DataFrames)
+:ballot_box_with_check: `Collection` class to encapsulate and manage multiple DataFrames
+:ballot_box_with_check: DataFrame sanity checks
+:black_square_button: Datatype management
 
 
 ## Installation
