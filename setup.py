@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="panda-grove",
-    version="dev",
+    version="0.1",
     author="Filip Buric",
     author_email="",
     description="Convenience wrappers for Pandas DataFrame collections and operations",
