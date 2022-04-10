@@ -38,3 +38,4 @@ pip install panda-grove
 
 - python >= 3.7
 - pandas >= 1.1.0
+- IPython >= 7 is not required but will add pretty printing in Jupyter notebooks

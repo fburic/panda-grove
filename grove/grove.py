@@ -1,10 +1,15 @@
 import logging
 from pathlib import Path
 from typing import Iterable, Union
+import sys
 
-from IPython.display import display, Pretty
 import numpy as np
 import pandas as pd
+
+if 'ipython' in sys.modules:
+    from IPython.display import display
+else:
+    display = print
 
 __all__ = ['Collection', 'merge', 'reduce_mem_series', 'reduce_mem_df',
            'sanity_check_df',
