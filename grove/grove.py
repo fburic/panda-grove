@@ -1,12 +1,19 @@
+import logging
 from pathlib import Path
 from typing import Iterable, Union
 
+from IPython.display import display, Pretty
 import numpy as np
 import pandas as pd
 
 __all__ = ['Collection', 'merge', 'reduce_mem_series', 'reduce_mem_df',
            'sanity_check_df',
            'GroveError']
+
+
+LOG_FORMAT = "%(name)s %(levelname)s:\t%(message)s"
+logging.basicConfig(format=LOG_FORMAT, level=logging.INFO)
+logger = logging.getLogger('grove')
 
 
 class Collection:
@@ -232,8 +239,8 @@ class Collection:
         print(info)
         if verbose:
             for df_name in df_names:
-                print(_decoration_title(df_name))
-                print(self._data_frames[df_name].info(memory_usage=not memory_usage))
+                display(TextHeader(df_name))
+                display(self._data_frames[df_name].dtypes.rename('Dtype').rename_axis('Column').reset_index())
                 print()
 
     def reduce_mem(self, target_float: str = 'float32'):
@@ -321,8 +328,18 @@ class Collection:
         :param n: How many rows to show
         """
         for df_name, df in self._data_frames.items():
-            print(_decoration_title(df_name))
-            print(df.head(n))
+            display(TextHeader(df_name), df.head(n))
+            print()
+
+    def sanity_checks(self) -> None:
+        """
+        Iteratively check for typical desirable data properties for all
+        Collection DataFrames.
+        See documentation for :py:func:`grove.sanity_check_df` for more details
+        """
+        for df_name, df in self._data_frames.items():
+            display(TextHeader(df_name))
+            sanity_check_df(df)
             print()
 
     @property
@@ -582,6 +599,7 @@ def sanity_check_df(df: pd.DataFrame, id_column: str = '') -> bool:
 
     - Unique IDs (either in specified ``id_column`` or any non-float, no-N/As column)
     - No completely empty (N/A) columns
+    - Warn about 'object' type columns since they cause merge problems
 
     Example
     -------
@@ -607,42 +625,74 @@ def sanity_check_df(df: pd.DataFrame, id_column: str = '') -> bool:
     :param id_column: If given, this column is checked for unique values
     :return: **True** if all checks passed, **False** otherwise
     """
-    passed = True
+    if all([
+        _check_id_col(df, id_column),
+        _check_null_cols(df),
+        _check_obj_cols(df)
+        ]
+    ):
+        logger.info('All checks passed')
+        return True
+    return False
 
+
+def _check_id_col(df: pd.DataFrame, id_column: str = ''):
+    """
+    Return True (passed) if the provided `id_column` has unique values
+    or if any column has unique values and can be used as ID, if `id_column` not given.
+    """
+    passed = True
     if id_column:
         if not _series_has_unique_values(df[id_column]):
-            print(f"WARN: ID column '{id_column}' does not have unique values")
+            logger.warning(f"ID column '{id_column}' does not have unique values")
             passed = False
         elif df[id_column].isna().any():
-            print(f"WARN: ID column '{id_column}' has N/A values")
+            logger.warning(f"ID column '{id_column}' has N/A values")
             passed = False
     else:
         potential_id_columns = []
         for label, _ in df.items():
             if (df[label].dtype.kind != 'f'
                 and _series_has_unique_values(df[label])
-                and df[label].isna().any()
+                and not df[label].isna().any()
             ):
                 potential_id_columns.append(label)
         if not potential_id_columns:
-            print('WARN: No columns in the DataFrame can be used as IDs (unique, non-float, no N/As)')
+            logger.warning('No columns in the DataFrame can be used as IDs (unique, non-float, no N/As)')
             passed = False
         else:
-            print('INFO: Potential ID columns (unique values):',
-                  str(potential_id_columns))
+            logger.info(
+                'Potential ID columns (unique values): ' + str(potential_id_columns)
+            )
+    return passed
 
+
+def _check_null_cols(df: pd.DataFrame):
+    """Return True (passed) if no columns in `df` are completely null."""
     null_columns = []
     for label, _ in df.items():
         if df[label].isna().all():
             null_columns.append(label)
     if null_columns:
-        print('WARN: The following columns are completely empty (N/A):',
-              str(null_columns))
-        passed = False
+        logger.warning(
+            'The following columns are completely empty (N/A): ' + str(null_columns)
+        )
+        return False
+    return True
 
-    if passed:
-        print('INFO: All checks passed')
-    return passed
+
+def _check_obj_cols(df: pd.DataFrame):
+    """Return True (passed) if no columns in `df` have `object` dtype."""
+    obj_columns = []
+    for label, _ in df.items():
+        if df[label].dtype == np.dtype('O'):
+            obj_columns.append(label)
+    if obj_columns:
+        logger.warning(
+            "The following columns have dtype 'object' and will likely cause merge errors: " + str(obj_columns)
+        )
+        return False
+    return True
 
 
 def _series_has_unique_values(series: pd.Series) -> bool:
@@ -673,6 +723,17 @@ def _depth(on_list: Union[list, str]) -> int:
         return _depth(on_list[0]) + 1
     else:
         return 0
+
+
+class TextHeader:
+    def __init__(self, text: str = ''):
+        self.text = text
+
+    def _repr_html_(self):
+        return f"<span style = 'border-bottom: 1px solid #000'><u><b>{self.text}</b></u></span>"
+
+    def __repr__(self):
+        return _decoration_title(self.text)
 
 
 class GroveError(Exception):

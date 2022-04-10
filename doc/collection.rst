@@ -25,6 +25,7 @@ Methods
   ~Collection.info
   ~Collection.merge
   ~Collection.reduce_mem
+  ~Collection.sanity_checks
 
 Attributes
 """"""""""

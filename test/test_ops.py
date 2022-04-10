@@ -170,18 +170,23 @@ def test_reduce_mem_df():
 
 
 def test_sanity_check_df():
-    df = pd.DataFrame.from_records(
-        zip([10, 20, 30, 10, 40],
+    df_fail = pd.DataFrame.from_records(
+        zip(np.array([10, 20, 30, 10, 40], dtype='uint8'),
+            np.array([1, 2, 3, 4, 5], dtype='uint8'),
             ['a', 'b', 'c', 'd', 'e'],
-            ['10', '20', '30', '40', None]),
-        columns=['id', 'descr', 'serials']
+            ['10', '20', '30', '40', None],
+            [np.nan] * 5
+            ),
+        columns=['id', 'idx', 'descr', 'serials', 'extra']
     )
-    assert grove.sanity_check_df(df)
-    assert not grove.sanity_check_df(df, id_column='id')
-    assert not grove.sanity_check_df(df, id_column='serials')
-
-    df = df.assign(values = [np.nan] * 5)
-    assert not grove.sanity_check_df(df)
+    df_ok = pd.DataFrame.from_records(
+        zip(np.array([10, 20, 30, 10, 40], dtype='uint8'),
+            np.array([1, 2, 3, 4, 5], dtype='uint8')
+            ),
+        columns=['id', 'idx']
+    )
+    assert not grove.sanity_check_df(df_fail)
+    assert grove.sanity_check_df(df_ok)
 
 
 def test_depth():
