@@ -19,7 +19,13 @@ It also depends exclusively on the Pandas package for minimal overhead.
 
 ## Installation
 
-Install the package with `pip` in
+Install the PyPI package:
+
+```shell
+pip install panda-grove
+```
+
+Alternatively, install the package with `pip` in
 [editable](https://pip.pypa.io/en/stable/cli/pip_install/#editable-installs)
 mode from the repo:
 
@@ -27,11 +33,6 @@ mode from the repo:
 pip install -e git+ssh://github.com/fburic/panda-grove.git#egg=panda-grove
 ```
 
-**TODO** Install the PyPI package:
-
-```shell
-pip install panda-grove
-```
 
 
 ## Requirements

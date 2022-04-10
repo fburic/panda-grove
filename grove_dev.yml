@@ -10,6 +10,8 @@ dependencies:
   - sphinx
   - pip
   - pip:
+    - twine
+    - wheel
     - sphinx-copybutton
     - sphinx-toggleprompt
     - pydata-sphinx-theme
