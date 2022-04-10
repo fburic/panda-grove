@@ -4,19 +4,19 @@ Getting Started
 Installation
 ------------
 
-Install the package with ``pip`` in
+Install the PyPI package:
+
+.. code-block:: shell
+
+    pip install panda-grove
+
+Alternatively, install the package with ``pip`` in
 `editable <https://pip.pypa.io/en/stable/cli/pip_install/#editable-installs>`_
 mode from the repo:
 
 .. code-block:: shell
 
     pip install -e git+ssh://github.com/fburic/panda-grove.git#egg=panda-grove
-
-**TODO** Install the PyPI package:
-
-.. code-block:: shell
-
-    pip install panda-grove
 
 
 Start managing DataFrames with a Collection
