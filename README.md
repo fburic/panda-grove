@@ -7,8 +7,6 @@ creating yet another API on top of Pandas.
 
 It also depends exclusively on the Pandas package for minimal overhead.
 
-![AppVeyor tests](https://img.shields.io/appveyor/tests/fburic/panda-grove?color=brightgreen)
-
 ## Feature Highlights
 
 * :ballot_box_with_check: Multi-merges (merge across multiple DataFrames at once)
