@@ -1,11 +1,12 @@
 import setuptools
+import grove
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
     name="panda-grove",
-    version="0.1",
+    version=grove.__version__,
     author="Filip Buric",
     author_email="",
     description="Convenience wrappers for Pandas DataFrame collections and operations",
