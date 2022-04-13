@@ -34,7 +34,7 @@ html_theme_options = {
     'navbar_end': ['navbar-icon-links'],
 }
 html_logo = '../img/grove_logo.svg'
-# html_favicon = ''
+html_favicon = '../img/grove_logo.svg'
 # html_sidebars = {'**': ['localtoc.html', 'searchbox.html'] }
 
 # Add any paths that contain custom static files (such as style sheets) here,
