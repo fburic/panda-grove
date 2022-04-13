@@ -1,5 +1,8 @@
-Panda Grove documentation
-=========================
+.. |logo| image:: ../img/grove_logo.svg
+  :width: 100
+
+|logo| Panda Grove documentation
+================================
 
 **Version**: |version|
 

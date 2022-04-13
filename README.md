@@ -1,6 +1,13 @@
-# Panda Grove :bamboo:
+<div align="center">
+  <img src="img/grove_logo.svg"><br>
+</div>
 
-A lightweight package for easier management of multiple Pandas DataFrames.
+<h1 align="center">Panda Grove</h1>
+
+-----------------
+
+A lightweight package for easier management of multiple Pandas DataFrames
+during data analysis and exploration.
 
 The philosophy of Panda Grove is to assist without getting in the way or
 creating yet another API on top of Pandas.
@@ -22,16 +29,6 @@ Install the PyPI package:
 ```shell
 pip install panda-grove
 ```
-
-Alternatively, install the package with `pip` in
-[editable](https://pip.pypa.io/en/stable/cli/pip_install/#editable-installs)
-mode from the repo:
-
-```shell
-pip install -e git+ssh://github.com/fburic/panda-grove.git#egg=panda-grove
-```
-
-
 
 ## Requirements
 

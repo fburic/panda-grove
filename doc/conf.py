@@ -33,7 +33,7 @@ html_theme_options = {
     'github_url': 'https://github.com/fburic/panda-grove',
     'navbar_end': ['navbar-icon-links'],
 }
-# html_logo = ''
+html_logo = '../img/grove_logo.svg'
 # html_favicon = ''
 # html_sidebars = {'**': ['localtoc.html', 'searchbox.html'] }
 
