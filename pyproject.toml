@@ -1,3 +1,39 @@
 [build-system]
 requires = ["setuptools>=42", "pandas>=1.1.0"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "panda-grove"
+version = "0.1.2"
+dependencies = [
+        "pandas>=1.1.0"
+]
+requires-python = ">=3.7"
+authors = [{ name="Filip Buric" }]
+maintainers = [{ name="Filip Buric" }]
+description = "A lightweight package for easier management of multiple Pandas DataFrames"
+readme = {file = "README.txt", content-type = "text/markdown"}
+license = {file = "LICENSE"}
+classifiers = [
+        "Environment :: Console",
+        "Intended Audience :: Developers",
+        "Intended Audience :: Education",
+        "Intended Audience :: Science/Research",
+        "Topic :: Database",
+        "Topic :: Scientific/Engineering ",
+        "License :: OSI Approved :: BSD License",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3 :: Only"
+]
+
+[project.urls]
+Homepage = "https://panda-grove.readthedocs.io"
+Documentation = "https://panda-grove.readthedocs.io"
+Repository = "https://github.com/fburic/panda-grove"
+Issues = "https://github.com/fburic/panda-grove/issues"
+
+[tool.setuptools.packages.find]
+where = [""]
+include = ["grove*"]
+exclude = ["doc*", "test*"]
+namespaces = false
