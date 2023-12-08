@@ -6,9 +6,9 @@ import grove
 
 def test_issue_1_info_pandas_2():
     data = grove.Collection({
-        'items': 'data/items.csv',
-        'categories': 'data/categories.csv',
-        'measurements': 'data/measurements.csv'
+        'items': 'test/data/items.csv',
+        'categories': 'test/data/categories.csv',
+        'measurements': 'test/data/measurements.csv'
     })
 
     with redirect_stdout(io.StringIO()) as grove_print:

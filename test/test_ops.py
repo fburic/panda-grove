@@ -10,9 +10,9 @@ import grove
 
 def test_merge_same_id():
     data = grove.Collection(
-        [('items', 'data/items.csv'),
-         ('categories', 'data/categories.csv'),
-         ('measurements', 'data/measurements.csv')
+        [('items', 'test/data/items.csv'),
+         ('categories', 'test/data/categories.csv'),
+         ('measurements', 'test/data/measurements.csv')
          ]
     )
     merged_df = data.merge(['items', 'categories', 'measurements'], on='id')
@@ -33,9 +33,9 @@ def test_merge_same_id():
 
 def test_merge_diff_id():
     data = grove.Collection(
-        [('items', 'data/items.csv'),
-         ('categories', 'data/categories.csv'),
-         ('measurements', 'data/measurements.csv')
+        [('items', 'test/data/items.csv'),
+         ('categories', 'test/data/categories.csv'),
+         ('measurements', 'test/data/measurements.csv')
          ]
     )
     data['categories'] = data['categories'].rename(columns={'id': 'id1'})
@@ -59,9 +59,9 @@ def test_merge_diff_id():
 
 def test_merge_mixed_id():
     data = grove.Collection(
-        [('items', 'data/items.csv'),
-         ('categories', 'data/categories.csv'),
-         ('cat_descr', 'data/category_descriptions.csv')
+        [('items', 'test/data/items.csv'),
+         ('categories', 'test/data/categories.csv'),
+         ('cat_descr', 'test/data/category_descriptions.csv')
          ]
     )
     id_list = ['id', ['category', 'category_code']]
@@ -77,9 +77,9 @@ def test_merge_mixed_id():
 
 def test_merge_multicolumn():
     data = grove.Collection(
-        [('items', 'data/items.csv'),
-         ('categories', 'data/categories.csv'),
-         ('measurements', 'data/measurements.csv')
+        [('items', 'test/data/items.csv'),
+         ('categories', 'test/data/categories.csv'),
+         ('measurements', 'test/data/measurements.csv')
          ]
     )
 
@@ -109,9 +109,9 @@ def test_merge_multicolumn():
 
 def test_merge_dataframes():
     data = grove.Collection(
-        [('items', 'data/items.csv'),
-         ('categories', 'data/categories.csv'),
-         ('cat_descr', 'data/category_descriptions.csv')
+        [('items', 'test/data/items.csv'),
+         ('categories', 'test/data/categories.csv'),
+         ('cat_descr', 'test/data/category_descriptions.csv')
          ]
     )
     df_list = [data['items'][['id']],

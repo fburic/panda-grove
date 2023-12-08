@@ -9,12 +9,12 @@ import grove
 
 def test_create_collection_from_spec():
     data = grove.Collection(
-        [('items', 'data/items.csv'),
-         ('categories', 'data/categories.csv'),
-         ('measurements', 'data/measurements.csv')
+        [('items', 'test/data/items.csv'),
+         ('categories', 'test/data/categories.csv'),
+         ('measurements', 'test/data/measurements.csv')
          ]
     )
-    data['categories2'] = 'data/categories.csv'
+    data['categories2'] = 'test/data/categories.csv'
 
     assert data['items'].shape == (6, 2)
     assert data.categories.shape == (12, 2)
@@ -24,9 +24,9 @@ def test_create_collection_from_spec():
 
 def test_collection_inspection():
     data = grove.Collection(
-        [('items', 'data/items.csv'),
-         ('categories', 'data/categories.csv'),
-         ('measurements', 'data/measurements.csv')
+        [('items', 'test/data/items.csv'),
+         ('categories', 'test/data/categories.csv'),
+         ('measurements', 'test/data/measurements.csv')
          ]
     )
     assert data.dataframe_list == ['categories', 'items', 'measurements']
