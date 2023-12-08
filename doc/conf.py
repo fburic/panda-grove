@@ -2,8 +2,6 @@ import os
 import sys
 from datetime import datetime
 
-import grove
-
 sys.path.insert(0, os.path.abspath('..'))
 
 
@@ -12,7 +10,7 @@ project = 'Panda Grove'
 copyright = f'2021-{datetime.now().year}, Filip Buric'
 author = 'Filip Buric'
 language = 'en'
-version = grove.__version__
+version = '0.1.3'
 
 
 # -- General configuration ---------------------------------------------------
