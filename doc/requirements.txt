@@ -1,0 +1,6 @@
+pandas
+panda-grove
+sphinx-copybutton
+sphinx-toggleprompt
+pydata-sphinx-theme
+sphinx-autodoc-typehints
