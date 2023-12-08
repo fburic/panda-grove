@@ -222,8 +222,6 @@ class Collection:
         """
         n_df = len(self._data_frames.items())
         df_names = sorted([df_name for df_name in self._data_frames.keys()])
-        if n_df == 0:
-            return 'Collection is empty'
         info = ''
         info += f'Contents: {n_df} DataFrames\n' + str(df_names) + '\n'
 
@@ -234,8 +232,11 @@ class Collection:
                   for df_name, df in self._data_frames.items()],
                 columns=['DataFrame', 'MiB']
             )
-            mem_list = mem_list.append(
-                {'DataFrame': 'TOTAL', 'MiB': mem_list['MiB'].sum()},
+            mem_list = pd.concat(
+                [
+                    mem_list,
+                    pd.DataFrame([{'DataFrame': 'TOTAL', 'MiB': mem_list['MiB'].sum()}])
+                ],
                 ignore_index=True
             )
             info += mem_list.to_string(index=False) + '\n'

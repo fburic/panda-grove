@@ -1,6 +1,9 @@
 """
 Test general Collection management
 """
+from contextlib import redirect_stdout
+import io
+
 import grove
 
 
@@ -27,3 +30,20 @@ def test_collection_inspection():
          ]
     )
     assert data.dataframe_list == ['categories', 'items', 'measurements']
+
+
+def test_collection_info():
+    """
+    Test some edge cases.
+    Notes:
+    - The output is cumulative with verbose=True, so have it set.
+    - Empty DataFrames still have metainfo and will yield output (no need to test)
+    """
+
+    # Edge case: empty Collection
+
+    data = grove.Collection()
+    with redirect_stdout(io.StringIO()) as grove_print:
+        data.info(verbose=True)
+    grove_print = grove_print.getvalue()
+    assert grove_print.startswith('Contents: 0 DataFrames')
