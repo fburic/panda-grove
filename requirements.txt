@@ -1,6 +1,0 @@
-pandas==1.1.0
-panda-grove
-sphinx-copybutton
-sphinx-toggleprompt
-pydata-sphinx-theme
-sphinx-autodoc-typehints
