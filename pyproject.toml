@@ -34,6 +34,6 @@ Issues = "https://github.com/fburic/panda-grove/issues"
 
 [tool.setuptools.packages.find]
 where = [""]
-include = ["grove*"]
+include = ["grove*", "README", "LICENSE"]
 exclude = ["doc*", "test*"]
 namespaces = false
