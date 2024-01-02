@@ -355,11 +355,11 @@ class Collection:
         return sorted(self._data_frames.keys())
 
 
-def merge(df_list: list, on: Union[str, list] = None) -> pd.DataFrame:
+def merge(df_list: list, on: Union[str, int, list] = None) -> pd.DataFrame:
     """
     Merge multiple DataFrames.
-    This module-level function allows more flexibility in passing DataFrame
-    while doing any on-the-fly operations.
+    This module-level function allows more flexibility in passing DataFrames
+    while doing any on-the-fly operations, outside a Collection.
 
     Example
     -------
@@ -435,7 +435,7 @@ def merge(df_list: list, on: Union[str, list] = None) -> pd.DataFrame:
     # Normal form is [[ids, ids], [ids, ids], ... ]
     if on is None:
         id_list = [[None, None] for _ in range(len(df_list) - 1)]
-    elif isinstance(on, str):
+    elif isinstance(on, str) or isinstance(on, int):
         id_list = [[on, on] for _ in range(len(df_list) - 1)]
     elif isinstance(on, list):
         id_list = on

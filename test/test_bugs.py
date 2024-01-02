@@ -1,7 +1,9 @@
 # Tests for bugs
 from contextlib import redirect_stdout
 import io
+
 import grove
+import pandas as pd
 
 
 def test_issue_1_info_pandas_2():
@@ -23,3 +25,22 @@ def test_issue_1_info_pandas_2():
     assert 'categories' in grove_print
     assert 'measurements' in grove_print
     assert 'TOTAL' in grove_print
+
+
+def test_issue_2_numerical_col_names():
+    df1 = pd.DataFrame(
+        [('a', 1),
+         ['b', 2]]
+    )
+    df2 = pd.DataFrame(
+        [('x', 1),
+         ['b', 3]]
+    )
+    data = grove.Collection({
+        'A': df1,
+        'B': df2
+    })
+    result = data.merge(['A', 'B'], on=0)
+    expected_result = pd.merge(df1, df2, on=0)
+    assert result.shape[0] > 0
+    assert result.compare(expected_result).empty

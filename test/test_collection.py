@@ -5,6 +5,7 @@ from contextlib import redirect_stdout
 import io
 
 import grove
+import pandas as pd
 
 
 def test_create_collection_from_spec():
@@ -20,6 +21,22 @@ def test_create_collection_from_spec():
     assert data.categories.shape == (12, 2)
     assert data.categories2.shape == (12, 2)
     assert data['measurements'].shape == (15, 3)
+
+
+def test_create_collection_from_data():
+    df1 = pd.DataFrame(
+        [('a', 1),
+         ['b', 2]]
+    )
+    df2 = pd.DataFrame(
+        [('x', 1),
+         ['b', 3]]
+    )
+    data = grove.Collection({
+        'A': df1,
+        'B': df2
+    })
+    assert len(data.dataframe_list) == 2
 
 
 def test_collection_inspection():
