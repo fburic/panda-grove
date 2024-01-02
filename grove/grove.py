@@ -132,7 +132,7 @@ class Collection:
 
     def merge(self, df_name_list: list, on: Union[str, list] = None) -> pd.DataFrame:
         """
-        Merge multiple DataFrames in the Collection.
+        Merge multiple DataFrames in the Collection (as an inner join).
 
         The merging is performed pairwise, in the specified order.
         I.e. for a given list ``['A', 'B', 'C']``,
@@ -147,6 +147,9 @@ class Collection:
         a pair of strings (*left_on*, *right_on* arguments),
         or a pair of list of multiple columns to join on.
         See *Examples* below.
+
+        Numerical suffixes are used for identically named columns,
+        to allow an arbitrary number of merged DataFrames.
 
         Note:
             Since the merge operation is performed iteratively left-to-right,
@@ -357,9 +360,9 @@ class Collection:
 
 def merge(df_list: list, on: Union[str, int, list] = None) -> pd.DataFrame:
     """
-    Merge multiple DataFrames.
+    Merge multiple DataFrames (as an inner join).
     This module-level function allows more flexibility in passing DataFrames
-    while doing any on-the-fly operations, outside a Collection.
+    while doing on-the-fly operations, outside a Collection.
 
     Example
     -------
@@ -386,6 +389,9 @@ def merge(df_list: list, on: Union[str, int, list] = None) -> pd.DataFrame:
     a pair of strings (*left_on*, *right_on* arguments),
     or a pair of list of multiple columns to join on.
     See *Examples* below.
+
+    Numerical suffixes are used for identically named columns,
+    to allow an arbitrary number of merged DataFrames.
 
     Note:
         Since the merge operation is performed iteratively left-to-right,
@@ -491,10 +497,13 @@ def merge(df_list: list, on: Union[str, int, list] = None) -> pd.DataFrame:
                 merged_df,
                 df_list[i + 1],
                 left_on=m_id[0],
-                right_on=m_id[1]
+                right_on=m_id[1],
+                suffixes=('_' + str(i), '_' + str(i+1))
             )
         except Exception as e:
-            print(f"Error merging in '{df_list[i]}'")
+            print(f"Error merging in the following DataFrame \n{df_list[i]}\n\n"
+                  f"to the intermediately merged DataFrame \n{merged_df}\n\n"
+                  "Raising caught exception.")
             raise e
 
     return merged_df
