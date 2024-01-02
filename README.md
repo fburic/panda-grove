@@ -19,6 +19,7 @@ It also depends exclusively on the Pandas package for minimal overhead.
 * :ballot_box_with_check: Multi-merges (merge across multiple DataFrames at once)
 * :ballot_box_with_check: `Collection` class to encapsulate and manage multiple DataFrames
 * :ballot_box_with_check: DataFrame sanity checks
+* :black_square_button: Support all types of joins (currently only inner join)
 * :black_square_button: Datatype management (work in progress)
 
 
